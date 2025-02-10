@@ -35,13 +35,13 @@ public class ApiV1MemberController {
                 "201-1",
                 "회원 가입이 완료되었습니다.",
                 new MemberDto(member)
-                );
+        );
     }
 
 
     record LoginReqBody(@NotBlank String username, @NotBlank String password) {}
 
-    record LoginResBody(MemberDto item, String apiKey) {}
+    record LoginResBody(MemberDto item, String apiKey, String accessToken) {}
 
     @PostMapping("/login")
     public RsData<LoginResBody> login(@RequestBody @Valid LoginReqBody reqBody) {
@@ -54,12 +54,15 @@ public class ApiV1MemberController {
             throw new ServiceException("401-2", "비밀번호가 일치하지 않습니다.");
         }
 
+        String authToken = memberService.getAuthToken(member);
+
         return new RsData<>(
                 "200-1",
                 "%s님 환영합니다.".formatted(member.getNickname()),
                 new LoginResBody(
                         new MemberDto(member),
-                        member.getApiKey()
+                        member.getApiKey(),
+                        authToken
                 )
         );
     }
